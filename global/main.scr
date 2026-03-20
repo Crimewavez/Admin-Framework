@@ -1,0 +1,6 @@
+// main.scr - Entry point, hands off to the loader
+
+main:
+{
+	waitthread global/core/loader.scr::fw_init
+}end

@@ -1,0 +1,49 @@
+// loader.scr - Boots the framework
+
+fw_init:
+{
+	waitthread global/core/debug.scr::dbg_print "\n========================================\n"
+	waitthread global/core/debug.scr::dbg_print "  OpenMOHAA Framework - Starting\n"
+	waitthread global/core/debug.scr::dbg_print "========================================\n\n"
+
+	waitthread global/core/config.scr::config_load
+	if (!level.fw_config_loaded) {
+		waitthread global/core/debug.scr::dbg_error "core" "Config failed to load, aborting"
+		end
+	}
+
+	waitthread global/core/router.scr::router_detect
+	waitthread _load_modules
+
+	local.name = waitthread global/core/config.scr::config_get "framework.name"
+	local.ver = waitthread global/core/config.scr::config_get "framework.version"
+	waitthread global/core/debug.scr::dbg_info "core" (local.name + " v" + local.ver + " ready")
+}end
+
+_load_modules:
+{
+	level.fw_module_count = 0
+	local.i = 0
+
+	while (1) {
+		local.name = waitthread global/core/config.scr::config_get ("modules." + local.i)
+		if (local.name == "" || local.name == NIL) {
+			break
+		}
+
+		local.enabled = waitthread global/core/config.scr::config_get (local.name + ".enabled")
+		if (local.enabled != "true" && local.enabled != 1) {
+			waitthread global/core/debug.scr::dbg_warn "loader" ("Skipping '" + local.name + "' (disabled)")
+			local.i++
+			continue
+		}
+
+		waitthread global/core/debug.scr::dbg_info "loader" ("Loading: " + local.name)
+		waitthread ("global/modules/main_" + local.name + ".scr")::init
+		level.fw_modules[level.fw_module_count] = local.name
+		level.fw_module_count++
+		local.i++
+	}
+
+	waitthread global/core/debug.scr::dbg_info "loader" (level.fw_module_count + " module(s) loaded")
+}end

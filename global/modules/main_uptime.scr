@@ -1,0 +1,26 @@
+// main_uptime.scr - Prints server uptime every 5 seconds
+
+
+init:
+{
+	waitthread global/core/debug.scr::dbg_info "uptime" "Module initialized, starting loop"
+	level.uptime_seconds = 0
+	thread uptime_loop
+}end
+
+uptime_loop:
+{
+	while (1) {
+		level.uptime_seconds = level.uptime_seconds + 5
+
+		local.mins = int(level.uptime_seconds / 60)
+		local.secs = level.uptime_seconds - (local.mins * 60)
+		waitthread global/core/debug.scr::dbg_print ("[uptime] Server up: " + local.mins + "m " + local.secs + "s\n")
+		wait 5
+	}
+}end
+
+info:
+{
+	end "uptime 0.1.0"
+}end

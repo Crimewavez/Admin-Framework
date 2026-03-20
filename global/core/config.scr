@@ -1,0 +1,38 @@
+// config.scr - Reads and parses JSON config files
+
+config_load:
+{
+	local.json = fs_read_content "config/framework.json"
+
+	if (local.json == NIL) {
+		waitthread global/core/debug.scr::dbg_error "config" "framework.json not found or empty"
+		level.fw_config_loaded = 0
+		end
+	}
+
+	local.ok = waitthread global/core/json_parser.scr::json_parse local.json ""
+	if (!local.ok) {
+		waitthread global/core/debug.scr::dbg_error "config" ("Parse failed: " + waitthread global/core/json_parser.scr::json_get_error)
+		level.fw_config_loaded = 0
+		end
+	}
+
+	waitthread global/core/debug.scr::dbg_info "config" "framework.json loaded"
+
+	local.json = fs_read_content "config/local.json"
+	if (local.json != NIL) {
+		local.ok = waitthread global/core/json_parser.scr::json_parse local.json ""
+		if (!local.ok) {
+			waitthread global/core/debug.scr::dbg_warn "config" ("local.json parse error: " + waitthread global/core/json_parser.scr::json_get_error)
+		} else {
+			waitthread global/core/debug.scr::dbg_info "config" "local.json loaded"
+		}
+	}
+
+	level.fw_config_loaded = 1
+}end
+
+config_get local.key:
+{
+	end (waitthread global/core/json_parser.scr::json_get local.key)
+}end

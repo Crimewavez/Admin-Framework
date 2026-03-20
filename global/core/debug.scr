@@ -1,0 +1,85 @@
+// debug.scr - Logging library
+// Active when developer cvar is 1
+// Writes to console and logfiles/debug.log
+
+_is_active:
+{
+	local.dev = getCvar "developer"
+	if (local.dev == "1" || local.dev == 1) {
+		end 1
+	}
+	end 0
+}end
+
+_write local.line:
+{
+	if (level.fw_log == NIL) {
+		level.fw_log = ""
+	}
+
+	level.fw_log = level.fw_log + local.line
+	local.f = fs_open_write "logfiles/debug.log"
+
+	if (local.f != NIL) {
+		local.f write level.fw_log level.fw_log.size
+		local.f flush
+		local.f close
+	}
+}end
+
+_out local.label local.tag local.msg:
+{
+	if (!(waitthread _is_active)) {
+		end
+	}
+	local.line = "[" + local.label + "] [" + local.tag + "] " + local.msg + "\n"
+	conprintf local.line
+	waitthread _write local.line
+}end
+
+// Print to console always, log to file when developer is on
+dbg_print local.text:
+{
+	conprintf local.text
+	if (waitthread _is_active) {
+		waitthread _write local.text
+	}
+}end
+
+// Log levels
+dbg_error local.tag local.msg:{ waitthread _out "ERROR" local.tag local.msg }end
+dbg_warn  local.tag local.msg:{ waitthread _out "WARN " local.tag local.msg }end
+dbg_info  local.tag local.msg:{ waitthread _out "INFO " local.tag local.msg }end
+dbg_debug local.tag local.msg:{ waitthread _out "DEBUG" local.tag local.msg }end
+dbg_trace local.tag local.msg:{ waitthread _out "TRACE" local.tag local.msg }end
+
+// Utilities
+dbg_sep:
+{
+	if (waitthread _is_active) {
+		local.line = "----------------------------------------\n"
+		conprintf local.line
+		waitthread _write local.line
+	}
+}end
+
+dbg_raw local.tag local.msg:
+{
+	if (waitthread _is_active) {
+		local.line = "[" + local.tag + "] " + local.msg + "\n"
+		conprintf local.line
+		waitthread _write local.line
+	}
+}end
+
+dbg_dump local.tag local.varname local.value:
+{
+	waitthread _out "DUMP " local.tag (local.varname + " = (" + typeof(local.value) + ") " + local.value)
+}end
+
+dbg_assert local.tag local.condition local.msg:
+{
+	if (!local.condition) {
+		waitthread _out "ASSERT" local.tag ("FAILED: " + local.msg)
+	}
+}end

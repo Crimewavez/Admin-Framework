@@ -1,0 +1,23 @@
+// main_ticker.scr - Prints a tick counter every 5 seconds
+
+
+init:
+{
+	waitthread global/core/debug.scr::dbg_info "ticker" "Module initialized, starting loop"
+	thread ticker_loop
+}end
+
+ticker_loop:
+{
+	local.count = 0
+	while (1) {
+		local.count++
+		waitthread global/core/debug.scr::dbg_print ("[ticker] Tick #" + local.count + "\n")
+		wait 5
+	}
+}end
+
+info:
+{
+	end "ticker 0.1.0"
+}end

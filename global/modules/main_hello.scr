@@ -1,0 +1,13 @@
+// main_hello.scr - Test module, just proves the loader works
+
+
+init:
+{
+	waitthread global/core/debug.scr::dbg_info "hello" "Module initialized"
+}end
+
+
+info:
+{
+	end "hello 0.1.0"
+}end

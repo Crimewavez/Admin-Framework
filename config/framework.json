@@ -1,0 +1,17 @@
+{
+	"framework": {
+		"name": "OpenMOHAA Framework",
+		"version": "0.1.0",
+		"debug": false
+	},
+	"modules": ["hello", "ticker", "uptime"],
+	"hello": {
+		"enabled": true
+	},
+	"ticker": {
+		"enabled": true
+	},
+	"uptime": {
+		"enabled": true
+	}
+}

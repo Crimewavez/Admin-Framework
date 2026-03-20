@@ -1,0 +1,50 @@
+// router.scr - Engine detection
+// Figures out if we're running on openmohaa or vanilla
+// Sets level.fw_engine and level.fw_targetPath
+
+
+// Simple substring search, returns 1 if found
+router_contains local.source local.text:
+{
+	if (local.source == NIL || local.text == NIL) {
+		end 0
+	}
+
+	if (local.source.size < local.text.size) {
+		end 0
+	}
+
+	local.match = 0
+	for (local.i = 0; local.i < local.source.size; local.i++) {
+		if (local.source[local.i] == local.text[local.match]) {
+			local.match++
+			if (local.match == local.text.size) {
+				end 1
+			}
+		} else {
+			local.match = 0
+		}
+	}
+
+	end 0
+}end
+
+
+// Detects the engine and sets the target path
+router_detect:
+{
+	local.override = getCvar("fw_target")
+	if (local.override == "vanilla" || local.override == "openmohaa") {
+		level.fw_engine = local.override
+	} else {
+		local.version = string(getCvar("version"))
+		if (waitthread router_contains local.version "OpenMoHAA") {
+			level.fw_engine = "openmohaa"
+		} else {
+			level.fw_engine = "vanilla"
+		}
+	}
+
+	level.fw_targetPath = "global/target/" + level.fw_engine + ".scr"
+	waitthread global/core/debug.scr::dbg_info "router" ("Engine: " + level.fw_engine)
+}end
